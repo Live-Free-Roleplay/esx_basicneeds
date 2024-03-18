@@ -4,6 +4,7 @@ local IsAnimated = false
 AddEventHandler('esx_basicneeds:resetStatus', function()
 	TriggerEvent('esx_status:set', 'hunger', 500000)
 	TriggerEvent('esx_status:set', 'thirst', 500000)
+	TriggerEvent('esx_status:set', 'stress', 0)
 end)
 
 RegisterNetEvent('esx_basicneeds:healPlayer')
@@ -11,6 +12,7 @@ AddEventHandler('esx_basicneeds:healPlayer', function()
 	-- restore hunger & thirst
 	TriggerEvent('esx_status:set', 'hunger', 1000000)
 	TriggerEvent('esx_status:set', 'thirst', 1000000)
+	TriggerEvent('esx_status:set', 'stress', 0)
 
 	-- restore hp
 	local playerPed = PlayerPedId()
@@ -43,11 +45,20 @@ AddEventHandler('esx_status:loaded', function(status)
 	end)
 end)
 
+TriggerEvent('esx_status:registerStatus', 'stress', 0, '#cadfff', function(status)
+	return false
+end, function(status)
+	status.add(0)
+end)
+
+
+
 AddEventHandler('esx_status:onTick', function(data)
-	local playerPed  = PlayerPedId()
-	local prevHealth = GetEntityHealth(playerPed)
-	local health     = prevHealth
-	
+    local playerPed  = PlayerPedId()
+    local prevHealth = GetEntityHealth(playerPed)
+    local health     = prevHealth
+    local stressVal  = 0
+
 	for k, v in pairs(data) do
 		if v.name == 'hunger' and v.percent == 0 then
 			if prevHealth <= 150 then
@@ -61,6 +72,8 @@ AddEventHandler('esx_status:onTick', function(data)
 			else
 				health = health - 1
 			end
+        elseif v.name == 'stress' and v.value then
+            stressVal = v.percent
 		end
 	end
 	
